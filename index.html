@@ -1,0 +1,111 @@
+<html>
+<head>
+    <title>Twilio Chat JS Console WebApp</title>
+    <link rel="shortcut icon" href="https://www.twilio.com/marketing/bundles/marketing/img/favicons/favicon.ico"/>
+    <link rel="apple-touch-icon" href="https://www.twilio.com/marketing/bundles/marketing/img/favicons/favicon_57.png"/>
+    <link rel="apple-touch-icon" sizes="72x72"
+          href="https://www.twilio.com/marketing/bundles/marketing/img/favicons/favicon_72.png"/>
+    <link rel="apple-touch-icon" sizes="114x114"
+          href="https://www.twilio.com/marketing/bundles/marketing/img/favicons/favicon_114.png"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://media.twiliocdn.com/sdk/js/common/v0.1/twilio-common.min.js"></script>
+    <script src="twilio-chat.js"></script>
+
+    <!-- log implementation -->
+    <script src="logging.js"></script>
+
+    <!-- Firebase support -->
+    <link rel="manifest" href="manifest.json"/>
+    <script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
+    <script src="firebase-support.js"></script>
+
+    <!-- Chat client helper -->
+    <script src="chat-client-helper.js"></script>
+
+    <!-- Test code -->
+    <script src="test.js"></script>
+</head>
+<body>
+<p>To start playing with console app enter your identity and desired push channel</p>
+<p>After login Chat client is accessible via global <i>`ChatClientHelper.client`</i> variable, open development console
+    in browser
+    and play with it!</p>
+
+<p style="padding:10px; border-style: ridge; border-width: 1px;">identity: <input type="text" id="identity"/>&nbsp;&nbsp;&nbsp;
+    push channel: <select id="pushChannel">
+        <option value="none">No pushes</option>
+        <option value="fcm">FCM</option>
+    </select>&nbsp;&nbsp;&nbsp;
+    <input type="button" id="submit" value="login"/>
+</p>
+
+<p>You can review your configuration in JSON <a href="/configuration">here</a></p>
+
+<br/>
+
+<div style="padding:10px; border-style: ridge; border-width: 1px;">
+    <i>This is HTML helper for sending Media Message via FormData</i><br/><br/>
+    <form id="mediaMessageFormHelper">
+        Channel SID: <input type="text" id="mediaMessageChannelSid"/>&nbsp;&nbsp;&nbsp;
+        File: <input type="file" id="mediaMessageFile" width="500px"/>&nbsp;&nbsp;&nbsp;
+        <input id="mediaMessageFileSubmit" type="button" value="upload"/>
+    </form>
+    <progress id="mediaMessageProgress" style="width: 600px;">Uploading media</progress>
+</div>
+
+<script>
+  $(function() {
+    $('#mediaMessageProgress').hide();
+    $('#submit').on('click', function() {
+      let pushChannel = $('#pushChannel').val();
+      let identity = $('#identity').val();
+      if (identity && pushChannel) {
+        switch (pushChannel) {
+          case 'fcm':
+            FirebaseSupport.init(log).then(() =>
+              ChatClientHelper
+                .login(log, identity, pushChannel, FirebaseSupport.registerForPushCallback)
+                .then(() => Test.init(log, ChatClientHelper.client, ChatClientHelper.accessManager)));
+            break;
+          default:
+            ChatClientHelper.login(log, identity)
+              .then(() => Test.init(log, ChatClientHelper.client, ChatClientHelper.accessManager));
+        }
+      } else {
+        log.error('index.html', 'no identity is set')
+      }
+    });
+
+    $('#mediaMessageFileSubmit').on('click', function() {
+      let channelSid = $('#mediaMessageChannelSid').val();
+      if (!channelSid) {
+        log.error('index.html', 'You must provide Channel SID to submit Media Message to');
+        return;
+      }
+
+      if (!($('#mediaMessageFile')[0].files && $('#mediaMessageFile')[0].files.length > 0)) {
+        log.error('index.html', 'You must provide file to submit as Media Message');
+        return;
+      }
+
+      let formData = new FormData();
+      formData.append("file", $('#mediaMessageFile')[0].files[0]);
+      $('#mediaMessageFormHelper').hide();
+      $('#mediaMessageProgress').show();
+
+      ChatClientHelper.sendMediaMessageWithFormData(channelSid, formData)
+        .catch((err) => {
+          log.error('index.html', 'Error while sending Media Message', err);
+          $('#mediaMessageFormHelper').show();
+          $('#mediaMessageProgress').hide();
+        })
+        .then(() => {
+          $('#mediaMessageProgress').hide();
+          $('#mediaMessageFormHelper').show();
+          $('#mediaMessageFormHelper').get(0).reset();
+        });
+    });
+  });
+</script>
+</body>
+</html>

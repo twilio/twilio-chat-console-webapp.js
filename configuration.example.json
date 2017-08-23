@@ -1,0 +1,29 @@
+{
+  "fcmConfig": {
+    "firebaseConfig": {
+      "apiKey": "",
+      "authDomain": "",
+      "databaseURL": "",
+      "projectId": "",
+      "storageBucket": "",
+      "messagingSenderId": ""
+    },
+    "manifest": {
+      "short_name": "",
+      "name": "",
+      "gcm_sender_id": ""
+    }
+  },
+  "chatClient": {
+    "options": {
+      "logLevel": "info"
+    }
+  },
+  "tokenGenerator": {
+    "accountSid": "ACxxx",
+    "signingKeySid": "SKxxx",
+    "signingKeySecret": "xxx",
+    "serviceSid": "ISxxx",
+    "fcm": "CRxxx"
+  }
+}

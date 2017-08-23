@@ -1,0 +1,29 @@
+{
+  "name": "twilio-chat-console-webapp.js",
+  "version": "0.0.1",
+  "description": "Twilio Chat JS Console WebApp",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:twilio/twilio-chat-console-webapp.js.git"
+  },
+  "author": "Twilio",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/core-js": "^0.9.42",
+    "@types/node": "^8.0.7",
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "http": "0.0.0",
+    "ngrok": "^2.2.22",
+    "twilio": "^3.6.2",
+    "twilio-chat": "1.2.0",
+    "twilio-common": "^0.1.7"
+  },
+  "engines": {
+    "node": ">=6"
+  }
+}
