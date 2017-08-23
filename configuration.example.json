@@ -1,0 +1,50 @@
+{
+  "fcmConfig": {
+    "firebaseConfig": {
+      "apiKey": "",
+      "authDomain": "",
+      "databaseURL": "",
+      "projectId": "",
+      "storageBucket": "",
+      "messagingSenderId": ""
+    },
+    "manifest": {
+      "short_name": "",
+      "name": "",
+      "gcm_sender_id": ""
+    }
+  },
+  "apnsConfig": {
+    "websiteJson": {
+      "websiteName": "",
+      "websitePushID": "",
+      "allowedDomains": [],
+      "urlFormatString": "",
+      "authenticationToken": "",
+      "webServiceURL": ""
+    },
+    "pushPackageProvider": {
+      "webServiceURLRelative": "",
+      "iconsetPath": "",
+      "certificatesPaths": {
+        "intermediate": "",
+        "key": "",
+        "certificate": ""
+      }
+    }
+  },
+  "chatClient": {
+    "js": "/node_modules/twilio-chat/dist/twilio-chat.js",
+    "options": {
+      "logLevel": "info"
+    }
+  },
+  "tokenGenerator": {
+    "accountSid": "ACxxx",
+    "signingKeySid": "SKxxx",
+    "signingKeySecret": "xxx",
+    "serviceSid": "ISxxx",
+    "fcm": "CRxxx",
+    "apns": "CRxxx"
+  }
+}
