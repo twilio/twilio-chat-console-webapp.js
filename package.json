@@ -22,7 +22,8 @@
     "https": "^1.0.0",
     "safari-push-notifications": "^0.3.1",
     "twilio": "^3.6.2",
-    "twilio-chat": "1.1.1"
+    "twilio-chat": "1.1.2",
+    "twilio-common": "^0.1.6"
   },
   "engines": {
     "node": ">=6"
