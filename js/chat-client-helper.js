@@ -34,6 +34,11 @@ const ChatClientHelper = {
       });
   },
 
+  sendMediaMessageWithFormData: function(channelSid, formData) {
+    return ChatClientHelper.client.getChannelBySid(channelSid)
+      .then((channel) => channel.sendMessage(formData));
+  },
+
   getToken: function(identity, pushChannel) {
     return $.ajax({
       url: '/token?identity=' + identity + '&pushChannel=' + pushChannel,

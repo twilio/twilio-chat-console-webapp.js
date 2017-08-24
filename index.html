@@ -40,9 +40,21 @@
         <option value="fcm">FCM</option>
         <option value="apns">APNS</option>
     </select>&nbsp;&nbsp;&nbsp;
-    <input type="button" id="submit" value="login"/></p>
+    <input type="button" id="submit" value="login"/>
+</p>
 
 <p>You can review your configuration in JSON <a href="/configuration">here</a></p>
+
+<br/>
+
+<form>
+    <p style="padding:10px; border-style: ridge; border-width: 1px;">
+        <i>This is HTML helper for sending Media Message via FormData</i><br/><br/>
+        Channel SID: <input type="text" id="mediaMessageChannelSid"/>&nbsp;&nbsp;&nbsp;
+        File: <input type="file" id="mediaMessageFile" width="500px"/>&nbsp;&nbsp;&nbsp;
+        <input id="mediaMessageFileSubmit" type="button" value="upload"/>
+    </p>
+</form>
 
 <script>
   $(function() {
@@ -71,6 +83,27 @@
       } else {
         log.error('index.html', 'no identity is set')
       }
+    });
+
+    $('#mediaMessageFileSubmit').on('click', function() {
+      let channelSid = $('#mediaMessageChannelSid').val();
+      if (!channelSid) {
+        log.error('You must provide Channel SID to submit Media Message to');
+      }
+
+      if (!($('#mediaMessageFile')[0].files && $('#mediaMessageFile')[0].files.length > 0)) {
+        log.error('You must provide file to submit as Media Message');
+      }
+      let formData = new FormData();
+      formData.append("file", $('#mediaMessageFile')[0].files[0]);
+
+      ChatClientHelper.sendMediaMessageWithFormData(channelSid, formData)
+        .then(() => {
+          $('#mediaMessageChannelSid').val('');
+          let $el = $('#mediaMessageFile');
+          $el.wrap('<form>').closest('form').get(0).reset();
+          $el.unwrap();
+        });
     });
   });
 </script>
