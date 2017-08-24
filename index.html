@@ -47,17 +47,19 @@
 
 <br/>
 
-<form>
-    <p style="padding:10px; border-style: ridge; border-width: 1px;">
-        <i>This is HTML helper for sending Media Message via FormData</i><br/><br/>
+<div style="padding:10px; border-style: ridge; border-width: 1px;">
+    <i>This is HTML helper for sending Media Message via FormData</i><br/><br/>
+    <form id="mediaMessageFormHelper">
         Channel SID: <input type="text" id="mediaMessageChannelSid"/>&nbsp;&nbsp;&nbsp;
         File: <input type="file" id="mediaMessageFile" width="500px"/>&nbsp;&nbsp;&nbsp;
         <input id="mediaMessageFileSubmit" type="button" value="upload"/>
-    </p>
-</form>
+    </form>
+    <progress id="mediaMessageProgress" style="width: 600px;">Uploading media</progress>
+</div>
 
 <script>
   $(function() {
+    $('#mediaMessageProgress').hide();
     $('#submit').on('click', function() {
       let pushChannel = $('#pushChannel').val();
       let identity = $('#identity').val();
@@ -88,21 +90,30 @@
     $('#mediaMessageFileSubmit').on('click', function() {
       let channelSid = $('#mediaMessageChannelSid').val();
       if (!channelSid) {
-        log.error('You must provide Channel SID to submit Media Message to');
+        log.error('index.html', 'You must provide Channel SID to submit Media Message to');
+        return;
       }
 
       if (!($('#mediaMessageFile')[0].files && $('#mediaMessageFile')[0].files.length > 0)) {
-        log.error('You must provide file to submit as Media Message');
+        log.error('index.html', 'You must provide file to submit as Media Message');
+        return;
       }
+
       let formData = new FormData();
       formData.append("file", $('#mediaMessageFile')[0].files[0]);
+      $('#mediaMessageFormHelper').hide();
+      $('#mediaMessageProgress').show();
 
       ChatClientHelper.sendMediaMessageWithFormData(channelSid, formData)
+        .catch((err) => {
+          log.error('index.html', 'Error while sending Media Message', err);
+          $('#mediaMessageFormHelper').show();
+          $('#mediaMessageProgress').hide();
+        })
         .then(() => {
-          $('#mediaMessageChannelSid').val('');
-          let $el = $('#mediaMessageFile');
-          $el.wrap('<form>').closest('form').get(0).reset();
-          $el.unwrap();
+          $('#mediaMessageProgress').hide();
+          $('#mediaMessageFormHelper').show();
+          $('#mediaMessageFormHelper').get(0).reset();
         });
     });
   });
