@@ -145,5 +145,5 @@ if (config.express && config.express.certificates) {
 
   https.createServer(credentials, app).listen(3001, () => {
     console.log('HTTPS Server is running on port 3001');
-  })
+  });
 }
