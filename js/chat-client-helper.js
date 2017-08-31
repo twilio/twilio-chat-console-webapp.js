@@ -24,7 +24,7 @@ const ChatClientHelper = {
 
               ChatClientHelper.accessManager.on('tokenUpdated', am => {
                 ChatClientHelper.client.updateToken(am.token).catch(error => {
-                  log('Error while updating token', error.message);
+                  log.info('Error while updating token', error.message);
                 });
 
               });
@@ -49,7 +49,7 @@ const ChatClientHelper = {
 
   updateToken: function () {
     return ChatClientHelper.getToken(ChatClientHelper.identity, ChatClientHelper.pushChannel).then(token => {
-      log('Token retrieved from server:', token);
+      log.info('Token retrieved from server:', token);
       ChatClientHelper.accessManager.updateToken(token);
     });
   },
@@ -142,9 +142,9 @@ const ChatClientHelper = {
     return ChatClientHelper.channel.sendMessage(mediaOpts);
   },
 
-  sendForm: function() {
+  sendForm: function(file) {
     const formData = new FormData();
-    formData.append("file", $('#mediaMessageFile')[0].files[0]);
+    formData.append("file", file);
     return ChatClientHelper.channel.sendMessage(formData);
   }
 };
