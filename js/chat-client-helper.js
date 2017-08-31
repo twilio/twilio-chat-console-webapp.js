@@ -2,10 +2,14 @@
 
 const ChatClientHelper = {
   client: null,
+  channel: null,
+  lastMessage: null,
   accessManager: null,
   pushChannel: null,
+  log: null,
 
   login: function(log, identity, pushChannel, registerForPushCallback) {
+    ChatClientHelper.log = log;
     ChatClientHelper.pushChannel = pushChannel;
     ChatClientHelper.identity = identity;
 
@@ -20,7 +24,7 @@ const ChatClientHelper = {
 
               ChatClientHelper.accessManager.on('tokenUpdated', am => {
                 ChatClientHelper.client.updateToken(am.token).catch(error => {
-                  console.log('Error while updating token', error.message);
+                  log('Error while updating token', error.message);
                 });
 
               });
@@ -45,7 +49,7 @@ const ChatClientHelper = {
 
   updateToken: function () {
     return ChatClientHelper.getToken(ChatClientHelper.identity, ChatClientHelper.pushChannel).then(token => {
-      console.log('Token retrieved from server:', token);
+      log('Token retrieved from server:', token);
       ChatClientHelper.accessManager.updateToken(token);
     });
   },
@@ -90,7 +94,7 @@ const ChatClientHelper = {
     chatClient.on('pushNotification', obj => log.event('ChatClientHelper.client', 'onPushNotification', obj));
   },
 
-  subscribeToAllChatChannelEvents: function(channel) {
+  subscribeToAllChatChannelEvents: function (log, channel) {
     channel.on('memberJoined', obj => log.event('ChatClientHelper.channel.' + channel.sid, 'memberJoined', obj));
     channel.on('memberLeft', obj => log.event('ChatClientHelper.channel.' + channel.sid, 'memberLeft', obj));
     channel.on('memberUpdated', obj => log.event('ChatClientHelper.channel.' + channel.sid, 'memberUpdated', obj));
@@ -117,5 +121,30 @@ const ChatClientHelper = {
         });
       }
     }
+  },
+
+  createChannel: function() {
+    ChatClientHelper.client.createChannel().then(ch => {
+      ChatClientHelper.channel = ch;
+      ChatClientHelper.subscribeToAllChatChannelEvents(ChatClientHelper.log, ChatClientHelper.channel);
+
+      ChatClientHelper.channel.on('messageAdded', message => {
+        ChatClientHelper.log.info('ChatClientHelper', 'MessageAdded event received and setting variable lastMessage');
+        ChatClientHelper.lastMessage = message;
+      });
+
+      return ChatClientHelper.channel.join();
+    });
+  },
+
+  sendMedia: function() {
+    let mediaOpts = {contentType: "text/plain", media: "Hello"};
+    return ChatClientHelper.channel.sendMessage(mediaOpts);
+  },
+
+  sendForm: function() {
+    const formData = new FormData();
+    formData.append("file", $('#mediaMessageFile')[0].files[0]);
+    return ChatClientHelper.channel.sendMessage(formData);
   }
 };
