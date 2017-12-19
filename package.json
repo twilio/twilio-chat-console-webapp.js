@@ -14,13 +14,13 @@
   "license": "MIT",
   "devDependencies": {
     "@types/core-js": "^0.9.42",
-    "@types/node": "^8.0.34",
+    "@types/node": "^8.5.1",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "http": "0.0.0",
-    "ngrok": "^2.2.22",
-    "twilio": "^3.8.0",
-    "twilio-chat": "^1.2.1",
+    "ngrok": "^2.2.24",
+    "twilio": "^3.11.0",
+    "twilio-chat": "^2.0.1",
     "twilio-common": "^0.1.7"
   },
   "engines": {
