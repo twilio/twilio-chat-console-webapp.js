@@ -4,8 +4,6 @@ const Test = {
   log: null,
   client: null,
   accessManager: null,
-  channel: null,
-  lastMessage: null,
 
   init: function (log, client, accessManager) {
     Test.log = log;
