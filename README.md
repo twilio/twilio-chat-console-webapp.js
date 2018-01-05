@@ -5,14 +5,14 @@ This webapp supports FCM pushes in browsers supporting FCM.
 ## FCM configuration
 You will have to create the FCM credentials by yourself.
 
-Also, you will need to create credentials in the [Twilio Console](www.twilio.com/console/chat/credentials) with created certificates and app identifiers and store it in `configuration.json` file. 
+Also, you will need to create credentials in the [Twilio Console](https://www.twilio.com/console/chat/credentials) with created certificates and app identifiers and store it in `configuration.json` file. 
 
 FCM configuration is provided to the web console app with help of `credentials.json` file:
 1. You can get the Firebase configuration for the web app through Firebase Console
 2. The configuration you got then should be stored in the `fcmConfig` -> `firebaseConfig` JSON object.
 3. The `manifest.json` configuration should be saved in the `fcmConfig` -> `manifest` JSON object.
 
-Keep in mind, that to send pushes you have to turn on the push features for your service instance via [Twilio Console](www.twilio.com/console/chat) 
+Keep in mind, that to send pushes you have to turn on the push features for your service instance via [Twilio Console](https://www.twilio.com/console/chat) 
 
 ## Console webapp
 The app is served on localhost using [express.js app](app.js) on port `3000`. 
