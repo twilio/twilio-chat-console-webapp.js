@@ -9,11 +9,7 @@ if (firebaseConfig) {
 
   messaging.setBackgroundMessageHandler(payload => {
     console.log(`${new Date()} [firebase-messaging-sw.js] [INFO] Received background message`, payload);
-    clients.matchAll().then(clients => {
-      clients.forEach(client => {
-        return client.postMessage(payload);
-      });
-    });
+    return self.registration.showNotification('Twilio Chat JS', { icon: 'twilio-icon.png', body: payload.data.twi_body });
   });
 } else {
   console.log(`${new Date()} [firebase-messaging-sw.js] [WARN] no configuration found`);

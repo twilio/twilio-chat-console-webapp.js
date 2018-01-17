@@ -84,6 +84,3 @@ Token provider is served on `http://localhost:3000/token` or `https://<yourngrok
 2. update the `credentials.json` with your information
 3. run app with `npm start`
 4. open the ngrok url printed in the console in your favorite browsers (keep in mind that FCM is supported in Chrome and Firefox only)
-
-## TODO:
-* FireBase ServiceWorkers
