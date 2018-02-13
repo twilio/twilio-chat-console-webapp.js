@@ -8,7 +8,6 @@
     <link rel="apple-touch-icon" sizes="114x114"
           href="https://www.twilio.com/marketing/bundles/marketing/img/favicons/favicon_114.png"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
-    <script src="https://media.twiliocdn.com/sdk/js/common/v0.1/twilio-common.min.js"></script>
     <script src="twilio-chat.js"></script>
 
     <!-- log implementation -->
@@ -65,11 +64,11 @@
             FirebaseSupport.init(log).then(() =>
               ChatClientHelper
                 .login(log, identity, pushChannel, FirebaseSupport.registerForPushCallback)
-                .then(() => Test.init(log, ChatClientHelper.client, ChatClientHelper.accessManager)));
+                .then(() => Test.init(log, ChatClientHelper.client)));
             break;
           default:
             ChatClientHelper.login(log, identity)
-              .then(() => Test.init(log, ChatClientHelper.client, ChatClientHelper.accessManager));
+              .then(() => Test.init(log, ChatClientHelper.client));
         }
       } else {
         log.error('index.html', 'no identity is set')

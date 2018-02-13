@@ -88,9 +88,8 @@ http.createServer(app).listen(3000, () => {
     ngrokOptions.subdomain = config.ngrokSubdomain
   }
 
-  ngrok.once('connect', function(url) {
-    console.log('ngrok url is ' + url);
+  ngrok.connect(ngrokOptions).then(url=> {
+      console.log('ngrok url is ' + url);      
   });
-  ngrok.connect(ngrokOptions);
 
 });
