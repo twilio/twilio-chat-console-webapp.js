@@ -63,7 +63,10 @@ const ChatClientHelper = {
     chatClient.on('channelAdded', obj => log.event('ChatClientHelper.client', 'channelAdded', obj));
     chatClient.on('channelRemoved', obj => log.event('ChatClientHelper.client', 'channelRemoved', obj));
     chatClient.on('channelInvited', obj => log.event('ChatClientHelper.client', 'channelInvited', obj));
-    chatClient.on('channelJoined', obj => log.event('ChatClientHelper.client', 'channelJoined', obj));
+    chatClient.on('channelJoined', obj => {
+		log.event('ChatClientHelper.client', 'channelJoined', obj);
+		ChatClientHelper.subscribeToAllChatChannelEvents(log, obj);
+	});
     chatClient.on('channelLeft', obj => log.event('ChatClientHelper.client', 'channelLeft', obj));
     chatClient.on('channelUpdated', obj => log.event('ChatClientHelper.client', 'channelUpdated', obj));
     chatClient.on('memberJoined', obj => log.event('ChatClientHelper.client', 'memberJoined', obj));
@@ -109,28 +112,8 @@ const ChatClientHelper = {
     }
   },
 
-  createChannel: function() {
-    ChatClientHelper.client.createChannel().then(ch => {
-      ChatClientHelper.channel = ch;
-      ChatClientHelper.subscribeToAllChatChannelEvents(ChatClientHelper.log, ChatClientHelper.channel);
-
-      ChatClientHelper.channel.on('messageAdded', message => {
-        ChatClientHelper.log.info('ChatClientHelper', 'MessageAdded event received and setting variable lastMessage');
-        ChatClientHelper.lastMessage = message;
-      });
-
-      return ChatClientHelper.channel.join();
-    });
-  },
-
-  sendMedia: function() {
-    let mediaOpts = {contentType: "text/plain", media: "Hello"};
-    return ChatClientHelper.channel.sendMessage(mediaOpts);
-  },
-
-  sendForm: function(file) {
-    const formData = new FormData();
-    formData.append("file", file);
-    return ChatClientHelper.channel.sendMessage(formData);
+  sendMediaMessageWithFormData: function(channelSid, formData) {
+	return ChatClientHelper.client.getChannelBySid(channelSid)
+	  .then(channel => channel.sendMessage(formData));
   }
 };
