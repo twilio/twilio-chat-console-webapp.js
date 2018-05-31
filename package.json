@@ -20,7 +20,7 @@
     "http": "0.0.0",
     "ngrok": "^3.0.1",
     "twilio": "^3.14.0",
-    "twilio-chat": "3.0.0-rc8"
+    "twilio-chat": "^3.0.0"
   },
   "engines": {
     "node": ">=6"
