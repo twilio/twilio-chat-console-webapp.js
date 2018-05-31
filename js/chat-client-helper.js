@@ -4,7 +4,6 @@ const ChatClientHelper = {
   client: null,
   channel: null,
   lastMessage: null,
-  accessManager: null,
   pushChannel: null,
   log: null,
 
@@ -20,21 +19,11 @@ const ChatClientHelper = {
           return Twilio.Chat.Client.create(data, chatClientConfig.options || {})
             .then((chatClient) => {
               ChatClientHelper.client = chatClient;
-              ChatClientHelper.accessManager = new Twilio.AccessManager(data);
-
-              ChatClientHelper.accessManager.on('tokenUpdated', am => {
-                ChatClientHelper.client.updateToken(am.token).catch(error => {
-                  log.info('Error while updating token', error.message);
-                });
-
-              });
-              ChatClientHelper.accessManager.on('tokenExpired', ChatClientHelper.updateToken);
-
+              ChatClientHelper.client.on('tokenAboutToExpire', ChatClientHelper.updateToken);
               ChatClientHelper.client.on('pushNotification', push => {
                 if (push.body)
                   ChatClientHelper.showWebApiNotification(push.body);
               });
-              ChatClientHelper.subscribeToAllAccessManagerEvents(log, ChatClientHelper.accessManager);
               ChatClientHelper.subscribeToAllChatClientEvents(log, ChatClientHelper.client);
               if (registerForPushCallback) {
                 registerForPushCallback(log, ChatClientHelper.client);
@@ -49,8 +38,8 @@ const ChatClientHelper = {
 
   updateToken: function () {
     return ChatClientHelper.getToken(ChatClientHelper.identity, ChatClientHelper.pushChannel).then(token => {
-      log.info('Token retrieved from server:', token);
-      ChatClientHelper.accessManager.updateToken(token);
+      log.info('ChatClientHelper', 'Token retrieved from server:', token);
+      ChatClientHelper.client.updateToken(token);
     });
   },
 
@@ -67,11 +56,6 @@ const ChatClientHelper = {
     });
   },
 
-  subscribeToAllAccessManagerEvents: function(log, accessManager) {
-    accessManager.on('tokenUpdated', obj => log.event('ChatClientHelper.accessManager', 'tokenUpdated', obj));
-    accessManager.on('tokenExpired', obj => log.event('ChatClientHelper.accessManager', 'tokenExpired', obj));
-  },
-
   subscribeToAllChatClientEvents: function(log, chatClient) {
     chatClient.on('userSubscribed', obj => log.event('ChatClientHelper.client', 'userSubscribed', obj));
     chatClient.on('userUpdated', obj => log.event('ChatClientHelper.client', 'userUpdated', obj));
@@ -79,7 +63,10 @@ const ChatClientHelper = {
     chatClient.on('channelAdded', obj => log.event('ChatClientHelper.client', 'channelAdded', obj));
     chatClient.on('channelRemoved', obj => log.event('ChatClientHelper.client', 'channelRemoved', obj));
     chatClient.on('channelInvited', obj => log.event('ChatClientHelper.client', 'channelInvited', obj));
-    chatClient.on('channelJoined', obj => log.event('ChatClientHelper.client', 'channelJoined', obj));
+    chatClient.on('channelJoined', obj => {
+		log.event('ChatClientHelper.client', 'channelJoined', obj);
+		ChatClientHelper.subscribeToAllChatChannelEvents(log, obj);
+	});
     chatClient.on('channelLeft', obj => log.event('ChatClientHelper.client', 'channelLeft', obj));
     chatClient.on('channelUpdated', obj => log.event('ChatClientHelper.client', 'channelUpdated', obj));
     chatClient.on('memberJoined', obj => log.event('ChatClientHelper.client', 'memberJoined', obj));
@@ -92,6 +79,8 @@ const ChatClientHelper = {
     chatClient.on('typingEnded', obj => log.event('ChatClientHelper.client', 'typingEnded', obj));
     chatClient.on('connectionStateChanged', obj => log.event('ChatClientHelper.client', 'connectionStateChanged', obj));
     chatClient.on('pushNotification', obj => log.event('ChatClientHelper.client', 'onPushNotification', obj));
+    chatClient.on('tokenAboutToExpire', obj => log.event('ChatClientHelper.client', 'tokenAboutToExpire', obj));
+    chatClient.on('tokenExpired', obj => log.event('ChatClientHelper.client', 'tokenExpired', obj));
   },
 
   subscribeToAllChatChannelEvents: function (log, channel) {
@@ -123,28 +112,8 @@ const ChatClientHelper = {
     }
   },
 
-  createChannel: function() {
-    ChatClientHelper.client.createChannel().then(ch => {
-      ChatClientHelper.channel = ch;
-      ChatClientHelper.subscribeToAllChatChannelEvents(ChatClientHelper.log, ChatClientHelper.channel);
-
-      ChatClientHelper.channel.on('messageAdded', message => {
-        ChatClientHelper.log.info('ChatClientHelper', 'MessageAdded event received and setting variable lastMessage');
-        ChatClientHelper.lastMessage = message;
-      });
-
-      return ChatClientHelper.channel.join();
-    });
-  },
-
-  sendMedia: function() {
-    let mediaOpts = {contentType: "text/plain", media: "Hello"};
-    return ChatClientHelper.channel.sendMessage(mediaOpts);
-  },
-
-  sendForm: function(file) {
-    const formData = new FormData();
-    formData.append("file", file);
-    return ChatClientHelper.channel.sendMessage(formData);
+  sendMediaMessageWithFormData: function(channelSid, formData) {
+	return ChatClientHelper.client.getChannelBySid(channelSid)
+	  .then(channel => channel.sendMessage(formData));
   }
 };
