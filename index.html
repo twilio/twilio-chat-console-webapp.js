@@ -7,6 +7,7 @@
           href="https://www.twilio.com/marketing/bundles/marketing/img/favicons/favicon_72.png"/>
     <link rel="apple-touch-icon" sizes="114x114"
           href="https://www.twilio.com/marketing/bundles/marketing/img/favicons/favicon_114.png"/>
+    <link rel="stylesheet" href="index.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
     <script src="twilio-chat.js"></script>
 
@@ -30,31 +31,60 @@
     in browser
     and play with it!</p>
 
-<p style="padding:10px; border-style: ridge; border-width: 1px;">identity: <input type="text" id="identity"/>&nbsp;&nbsp;&nbsp;
-    push channel: <select id="pushChannel">
+
+<div>
+<input type="text" id="identity" placeholder="Identity" />&nbsp;&nbsp;&nbsp;
+    <select id="pushChannel">
         <option value="none">No pushes</option>
         <option value="fcm">FCM</option>
     </select>&nbsp;&nbsp;&nbsp;
     <input type="button" id="submit" value="login"/>
-</p>
+</div>
 
 <p>You can review your configuration in JSON <a href="/configuration">here</a></p>
 
 <br/>
 
-<div style="padding:10px; border-style: ridge; border-width: 1px;">
+<div>
     <i>This is HTML helper for sending Media Message via FormData</i><br/><br/>
     <form id="mediaMessageFormHelper">
-        Channel SID: <input type="text" id="mediaMessageChannelSid"/>&nbsp;&nbsp;&nbsp;
-        File: <input type="file" id="mediaMessageFile" width="500px"/>&nbsp;&nbsp;&nbsp;
+        <input type="text" id="mediaMessageChannelSid" placeholder="Channel SID" />&nbsp;&nbsp;&nbsp;
+        <input type="file" id="mediaMessageFile" width="500px" placeholder="File"/>&nbsp;&nbsp;&nbsp;
         <input id="mediaMessageFileSubmit" type="button" value="upload"/>
     </form>
     <progress id="mediaMessageProgress" style="width: 600px;">Uploading media</progress>
 </div>
 
+<br/>
+
+<div>
+    <i>This is HTML helper for viewing Channel</i><br/><br/>
+    <input id="viewChannelSid" type="text" placeholder="Channel SID" style="width: auto;" /> 
+    &nbsp;&nbsp;&nbsp;
+    <input type="button" id="viewChannelGetBySid" value="Get Channel by SID"/>
+    &nbsp;&nbsp;&nbsp;
+    <span id="viewChannelInfo" style="font-size: smaller;">
+      <b>Type:</b>&nbsp;<span id="viewChannelType"></span>
+      &nbsp;&nbsp;&nbsp;
+      <b>Status:</b>&nbsp;<span id="viewChannelStatus"></span>
+      &nbsp;&nbsp;&nbsp;
+      <input type="button" id="viewChannelJoin" value="Join Channel"/>
+      &nbsp;&nbsp;&nbsp;
+      <input type="button" id="viewChannelLeave" value="Leave Channel"/>
+      &nbsp;&nbsp;&nbsp;
+      <input type="button" id="viewChannelDelete" value="Delete Channel"/>
+    </span>
+    <br/>
+    <br/>
+    <div id="messages" style="padding:5px; height:200px; overflow-y:auto;"></div>
+    <br/>
+    <input id="sendMessageInput" type="text" placeholder="say anything" style="width:100%;" />
+</div>
+  
 <script>
   $(function() {
     $('#mediaMessageProgress').hide();
+    $('#viewChannelInfo').hide();
     $('#submit').on('click', function() {
       let pushChannel = $('#pushChannel').val();
       let identity = $('#identity').val();
@@ -64,11 +94,17 @@
             FirebaseSupport.init(log).then(() =>
               ChatClientHelper
                 .login(log, identity, pushChannel, FirebaseSupport.registerForPushCallback)
-                .then(() => Test.init(log, ChatClientHelper.client)));
+                .then(() => {
+                  subscribeToViewChannelInfoChange();
+                  Test.init(log, ChatClientHelper.client);
+                }));
             break;
           default:
             ChatClientHelper.login(log, identity)
-              .then(() => Test.init(log, ChatClientHelper.client));
+              .then(() => {
+                  subscribeToViewChannelInfoChange();
+                  Test.init(log, ChatClientHelper.client);
+                });
         }
       } else {
         log.error('index.html', 'no identity is set')
@@ -104,6 +140,120 @@
           $('#mediaMessageFormHelper').get(0).reset();
         });
     });
+    
+    let viewChannel = null;
+    
+    let newMessageHandler = function(message) {
+      let $container = $('<div class="message-container">');
+      if (message.author === ChatClientHelper.client.user.identity) {
+        $container.addClass('message-container-right');
+      } else {
+        $container.addClass('message-container-left');
+      }
+      $container
+        .append($('<span class="message-author">').text(message.author + ':'))
+        .append($('<span class="message">').text(message.body));
+      $('#messages').append($container);
+      $('#messages').scrollTop($('#messages')[0].scrollHeight);
+    };
+    
+    function clearCurrentViewChannel() {
+      if (viewChannel) {
+        viewChannel.removeListener('messageAdded', newMessageHandler);
+      }
+      $('#messages').empty();
+      $('#viewChannelInfo').hide();
+      viewChannel = null;      
+    };
+    
+    function subscribeToViewChannelInfoChange() {
+      ChatClientHelper.client.on('channelAdded', channel => updateViewChannelInfo(channel));
+      ChatClientHelper.client.on('channelInvited', channel => updateViewChannelInfo(channel));
+      ChatClientHelper.client.on('channelJoined', channel => updateViewChannelInfo(channel));
+      ChatClientHelper.client.on('channelLeft', channel => updateViewChannelInfo(channel));
+      ChatClientHelper.client.on('channelUpdated', args => updateViewChannelInfo(args.channel));
+      ChatClientHelper.client.on('channelRemoved', channel => {
+        if (viewChannel && viewChannel.sid == channel.sid) {
+          clearCurrentViewChannel();
+        }
+      })
+    }
+    
+    function updateViewChannelInfo(channel) {
+      if (viewChannel && viewChannel.sid == channel.sid) {
+        $('#viewChannelType').text(channel.type);
+        $('#viewChannelStatus').text(channel.status);
+      }
+    };
+    
+    $('#viewChannelGetBySid').on('click', function() {
+      clearCurrentViewChannel();
+      let channelSid = $('#viewChannelSid').val();
+      if (!channelSid) {
+        log.error('index.html', 'You must provide Channel SID to get Channel to view');
+        return;
+      }
+      if (!ChatClientHelper.client) {
+        log.error('index.html', 'You must login first');
+        return;
+      }
+      
+      ChatClientHelper.client.getChannelBySid(channelSid)
+      	  .then(channel => {
+            viewChannel = channel;
+            viewChannel.on('messageAdded', newMessageHandler);
+            updateViewChannelInfo(channel);
+            $('#viewChannelInfo').show();
+            viewChannel.getMessages()
+              .then(paginator => paginator.items.forEach( entry => {
+                newMessageHandler(entry);
+              }))
+              .catch(err => log.error('index.html', 'Can\'t get get Channel (SID: ' + channelSid + ') messages:', err));
+          })
+          .catch((err) => {
+            log.error('index.html', 'Error while getting Channel with SID ' + channelSid , err);
+          });
+    });
+
+    $('#sendMessageInput').on('keydown', function(e) {
+      if (e.keyCode == 13) {
+        if (viewChannel) {
+          viewChannel.sendMessage($('#sendMessageInput').val())
+        } else {
+          log.error('index.html', 'You must first get Channel to send Messages');
+        }
+        $('#sendMessageInput').val('');
+      }
+    });
+    
+    $('#viewChannelDelete').on('click', function() {
+      if (viewChannel) {
+        viewChannel.delete()
+          .then(() => {
+            clearCurrentViewChannel();
+          })
+      }
+    });
+    
+    $('#viewChannelJoin').on('click', function() {
+      if (viewChannel) {
+        viewChannel.join()
+          .then(() => {
+            if ($('#messages').children().length == 0) {
+            viewChannel.getMessages()
+              .then(paginator => paginator.items.forEach( entry => {
+                newMessageHandler(entry);
+              }));
+            }
+          })
+      }
+    });
+    
+    $('#viewChannelLeave').on('click', function() {
+      if (viewChannel) {
+        viewChannel.leave();
+      }
+    });    
   });
 </script>
 </body>

@@ -72,6 +72,10 @@ app.get('/token', function(req, res) {
   }
 });
 
+app.get('/index.css', function(req, res) {
+  res.sendFile(__dirname + '/index.css');
+});
+
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html');
 });

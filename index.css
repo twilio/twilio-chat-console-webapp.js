@@ -1,0 +1,52 @@
+input {
+  outline:none;
+  background-color:transparent;
+  border-style: ridge; 
+  border-width: 1px; 
+  padding:5px;
+}
+
+select {
+  outline:none;
+  background-color:transparent;
+  border-style: ridge; 
+  border-width: 1px; 
+  padding:10px;
+} 
+
+div {
+  padding:10px; 
+  border-style: ridge; 
+  border-width: 1px; 
+  width:800px;
+}
+
+.info {
+  margin:5px 0;
+  font-style:italic;
+}
+
+.message-container-left {
+  float: left;  
+}
+
+.message-container-right {
+  float: right;
+}
+
+.message-container {
+  margin:5px 0;
+  width: initial;
+  max-width:80%;
+  border-radius: 15px;
+  border-width: 0px; 
+  background-color: whitesmoke;
+  font-size: smaller;
+  clear: both;
+}
+
+.message-author {
+  display:inline-block;
+  margin-right:5px;
+  font-weight:bold;
+}
