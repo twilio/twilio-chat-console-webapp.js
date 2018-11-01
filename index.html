@@ -33,12 +33,22 @@
 
 
 <div>
-<input type="text" id="identity" placeholder="Identity" />&nbsp;&nbsp;&nbsp;
-    <select id="pushChannel">
-        <option value="none">No pushes</option>
-        <option value="fcm">FCM</option>
-    </select>&nbsp;&nbsp;&nbsp;
-    <input type="button" id="submit" value="login"/>
+    <span id="inputLoginInformation">
+        <input type="text" id="identity" placeholder="Identity" />&nbsp;&nbsp;&nbsp;
+        <select id="pushChannel">
+            <option value="none">No pushes</option>
+            <option value="fcm">FCM</option>
+        </select>&nbsp;&nbsp;&nbsp;
+        <input type="button" id="submit" value="login"/>
+    </span>
+    <span id="viewConnectionInfo">
+      <b>Identity:</b>&nbsp;<span id="viewIdentity"></span>
+      &nbsp;&nbsp;&nbsp;
+      <b>Push Channel:</b>&nbsp;<span id="viewPushChannel"></span>
+      &nbsp;&nbsp;&nbsp;
+      <b>Connection Status:</b>&nbsp;<span id="viewConnectionStatus"></span>
+    </span>
+    
 </div>
 
 <p>You can review your configuration in JSON <a href="/configuration">here</a></p>
@@ -83,34 +93,51 @@
   
 <script>
   $(function() {
-    $('#mediaMessageProgress').hide();
-    $('#viewChannelInfo').hide();
-    $('#submit').on('click', function() {
+      $('#mediaMessageProgress').hide();
+      $('#viewChannelInfo').hide();
+      $('#viewConnectionInfo').hide();
+      $('#submit').on('click', function() {      
       let pushChannel = $('#pushChannel').val();
       let identity = $('#identity').val();
       if (identity && pushChannel) {
+        $('#inputLoginInformation').hide();
+        $('#viewPushChannel').text($('#pushChannel').val())
+        $('#viewIdentity').text($('#identity').val())
+        $('#viewConnectionStatus').text("...")
+        $('#viewConnectionInfo').show();
         switch (pushChannel) {
           case 'fcm':
             FirebaseSupport.init(log).then(() =>
               ChatClientHelper
                 .login(log, identity, pushChannel, FirebaseSupport.registerForPushCallback)
-                .then(() => {
-                  subscribeToViewChannelInfoChange();
-                  Test.init(log, ChatClientHelper.client);
+                .then(() => afterLogin())
+                .catch(err => {
+                  $('#viewConnectionInfo').hide();                  
+                  $('#inputLoginInformation').show();
+                  throw err;
                 }));
             break;
           default:
             ChatClientHelper.login(log, identity)
-              .then(() => {
-                  subscribeToViewChannelInfoChange();
-                  Test.init(log, ChatClientHelper.client);
-                });
+            .then(() => afterLogin())
+            .catch(err => {
+              $('#viewConnectionInfo').hide();                  
+              $('#inputLoginInformation').show();
+              throw err;
+            })
         }
       } else {
         log.error('index.html', 'no identity is set')
       }
     });
 
+    function afterLogin() {
+      $('#viewConnectionStatus').text(ChatClientHelper.client.connectionState)
+      ChatClientHelper.client.on('connectionStateChanged', state => $('#viewConnectionStatus').text(state));
+      subscribeToViewChannelInfoChange();
+      Test.init(log, ChatClientHelper.client);      
+    }
+    
     $('#mediaMessageFileSubmit').on('click', function() {
       let channelSid = $('#mediaMessageChannelSid').val();
       if (!channelSid) {
