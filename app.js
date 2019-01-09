@@ -34,8 +34,10 @@ app.get('/firebase-configuration.json', function(req, res) {
 
 app.get('/firebase-config.js', function(req, res) {
   if (config.fcmConfig && config.fcmConfig.firebaseConfig) {
+    res.type('text/javascript');
     res.send('const firebaseConfig = ' + JSON.stringify(config.fcmConfig.firebaseConfig));
   } else {
+    res.type('text/javascript');
     res.send('const firebaseConfig;');
   }
 });
