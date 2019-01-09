@@ -7,7 +7,6 @@ You will have to create the FCM credentials by yourself.
 
 Also, you will need to create credentials in the [Twilio Console](https://www.twilio.com/console/chat/credentials) with created certificates and app identifiers and store it in `configuration.json` file. 
 
-FCM configuration is provided to the web console app with help of `credentials.json` file:
 1. You can get the Firebase configuration for the web app through Firebase Console
 2. The configuration you got then should be stored in the `fcmConfig` -> `firebaseConfig` JSON object.
 3. The `manifest.json` configuration should be saved in the `fcmConfig` -> `manifest` JSON object.
@@ -81,6 +80,6 @@ Token provider is served on `http://localhost:3000/token` or `https://<yourngrok
 
 ## Running the app
 1. do the `npm install`
-2. update the `credentials.json` with your information
+2. update the `configuration.json` with your information
 3. run app with `npm start`
 4. open the ngrok url printed in the console in your favorite browsers (keep in mind that FCM is supported in Chrome and Firefox only)
