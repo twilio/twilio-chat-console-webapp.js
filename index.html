@@ -177,9 +177,17 @@
       } else {
         $container.addClass('message-container-left');
       }
-      $container
-        .append($('<span class="message-author">').text(message.author + ':'))
-        .append($('<span class="message">').text(message.body));
+      if (message.type === 'media') {
+        message.media.getContentUrl().then(url => {
+        $container
+          .append($('<span class="message-author">').text(message.author + ':'))
+          .append($('<span class="message">').append('<a href="' + url + '"" target="_blank">media message</a>'));                  
+        });
+      } else {
+        $container
+          .append($('<span class="message-author">').text(message.author + ':'))
+          .append($('<span class="message">').text(message.body));        
+      }
       $('#messages').append($container);
       $('#messages').scrollTop($('#messages')[0].scrollHeight);
     };
