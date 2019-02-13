@@ -58,14 +58,6 @@ app.get('/chat-client-configuration.json', function(req, res) {
   }
 });
 
-app.get('/configuration', function(req, res) {
-  if (config) {
-    res.json(config);
-  } else {
-    res.json({});
-  }
-});
-
 app.get('/token', function(req, res) {
   if (req.query.identity) {
     res.send(TokenProvider.getToken(req.query.identity, req.query.pushChannel));

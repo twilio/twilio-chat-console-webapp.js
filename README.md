@@ -44,15 +44,10 @@ All JS and json files used in the project are served through the [app.js](app.js
 
 * `/firebase-configuration.json` - Firebase configuration used in FCM push registration
 * `/manifest.json` - Firebase ServiceWorker configuration
-* `/configuration` - exposes whole project configuration for debugging  
-
-
 * `/firebase-messaging-sw.js` - Firebase ServiceWorker JavaScript
 * `/firebase-config.js` - configuration for Firebase (same data as `/firebase-configuration.json`) exposed as JavaScript object. Used for ServiceWorker 
 * `/firebase-support.js` - helper for working with Firebase, handles registration, pushes and showing alerts
-
 * `/logging.js` - logging helper, prints the info, warn, error, debug and events in console
-
 * `/twilio-chat.js` - main Twilio Programmable Chat package
 * `/chat-client-helper.js` - helper for Chat client. Handles registration, events and push registration
 * `/test.js` - test file, running right after client is fully initialized. Used for quick testing / proof-of-concept scripting 
