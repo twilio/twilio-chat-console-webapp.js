@@ -34,7 +34,7 @@
 
 <div>
     <span id="inputLoginInformation">
-        <input type="text" id="identity" placeholder="Identity" />&nbsp;&nbsp;&nbsp;
+        <input type="text" id="identity" placeholder="Identity"/>&nbsp;&nbsp;&nbsp;
         <select id="pushChannel">
             <option value="none">No pushes</option>
             <option value="fcm">FCM</option>
@@ -48,7 +48,7 @@
       &nbsp;&nbsp;&nbsp;
       <b>Connection Status:</b>&nbsp;<span id="viewConnectionStatus"></span>
     </span>
-    
+
 </div>
 
 <p>You can review your configuration in JSON <a href="/configuration">here</a></p>
@@ -58,7 +58,7 @@
 <div>
     <i>This is HTML helper for sending Media Message via FormData</i><br/><br/>
     <form id="mediaMessageFormHelper">
-        <input type="text" id="mediaMessageChannelSid" placeholder="Channel SID" />&nbsp;&nbsp;&nbsp;
+        <input type="text" id="mediaMessageChannelSid" placeholder="Channel SID"/>&nbsp;&nbsp;&nbsp;
         <input type="file" id="mediaMessageFile" width="500px" placeholder="File"/>&nbsp;&nbsp;&nbsp;
         <input id="mediaMessageFileSubmit" type="button" value="upload"/>
     </form>
@@ -69,7 +69,7 @@
 
 <div>
     <i>This is HTML helper for viewing Channel</i><br/><br/>
-    <input id="viewChannelSid" type="text" placeholder="Channel SID" style="width: auto;" /> 
+    <input id="viewChannelSid" type="text" placeholder="Channel SID" style="width: auto;"/>
     &nbsp;&nbsp;&nbsp;
     <input type="button" id="viewChannelGetBySid" value="Get Channel by SID"/>
     &nbsp;&nbsp;&nbsp;
@@ -88,15 +88,15 @@
     <br/>
     <div id="messages" style="padding:5px; height:200px; overflow-y:auto;"></div>
     <br/>
-    <input id="sendMessageInput" type="text" placeholder="say anything" style="width:100%;" />
+    <input id="sendMessageInput" type="text" placeholder="say anything" style="width:100%;"/>
 </div>
-  
+
 <script>
   $(function() {
-      $('#mediaMessageProgress').hide();
-      $('#viewChannelInfo').hide();
-      $('#viewConnectionInfo').hide();
-      $('#submit').on('click', function() {      
+    $('#mediaMessageProgress').hide();
+    $('#viewChannelInfo').hide();
+    $('#viewConnectionInfo').hide();
+    $('#submit').on('click', function() {
       let pushChannel = $('#pushChannel').val();
       let identity = $('#identity').val();
       if (identity && pushChannel) {
@@ -108,23 +108,24 @@
         switch (pushChannel) {
           case 'fcm':
             FirebaseSupport.init(log).then(() =>
-              ChatClientHelper
-                .login(log, identity, pushChannel, FirebaseSupport.registerForPushCallback)
-                .then(() => afterLogin())
-                .catch(err => {
-                  $('#viewConnectionInfo').hide();                  
-                  $('#inputLoginInformation').show();
-                  throw err;
-                }));
+                                             ChatClientHelper
+                                               .login(log, identity, pushChannel,
+                                                      FirebaseSupport.registerForPushCallback)
+                                               .then(() => afterLogin())
+                                               .catch(err => {
+                                                 $('#viewConnectionInfo').hide();
+                                                 $('#inputLoginInformation').show();
+                                                 throw err;
+                                               }));
             break;
           default:
             ChatClientHelper.login(log, identity)
-            .then(() => afterLogin())
-            .catch(err => {
-              $('#viewConnectionInfo').hide();                  
-              $('#inputLoginInformation').show();
-              throw err;
-            })
+              .then(() => afterLogin())
+              .catch(err => {
+                $('#viewConnectionInfo').hide();
+                $('#inputLoginInformation').show();
+                throw err;
+              })
         }
       } else {
         log.error('index.html', 'no identity is set')
@@ -135,9 +136,9 @@
       $('#viewConnectionStatus').text(ChatClientHelper.client.connectionState)
       ChatClientHelper.client.on('connectionStateChanged', state => $('#viewConnectionStatus').text(state));
       subscribeToViewChannelInfoChange();
-      Test.init(log, ChatClientHelper.client);      
+      Test.init(log, ChatClientHelper.client);
     }
-    
+
     $('#mediaMessageFileSubmit').on('click', function() {
       let channelSid = $('#mediaMessageChannelSid').val();
       if (!channelSid) {
@@ -167,9 +168,9 @@
           $('#mediaMessageFormHelper').get(0).reset();
         });
     });
-    
+
     let viewChannel = null;
-    
+
     let newMessageHandler = function(message) {
       let $container = $('<div class="message-container">');
       if (message.author === ChatClientHelper.client.user.identity) {
@@ -179,28 +180,42 @@
       }
       if (message.type === 'media') {
         message.media.getContentUrl().then(url => {
-        $container
-          .append($('<span class="message-author">').text(message.author + ':'))
-          .append($('<span class="message">').append('<a href="' + url + '"" target="_blank">media message</a>'));                  
+          if (message.media.contentType.startsWith('image/')) {
+            $container
+              .append($('<span class="message-author">').text(message.author + ':'))
+              .append($('<span class="message">').append(
+                '<a href="' + url + '"" target="_blank">' +
+                '<img width="100%" src="' + url + '" alt="' +
+                    (message.media.filename ? message.media.filename : message.media.sid) +
+                '"/>' +
+                '</a>'));
+
+          } else {
+            $container
+              .append($('<span class="message-author">').text(message.author + ':'))
+              .append($('<span class="message">').append('<a href="' + url + '"" target="_blank">' +
+                                                         (message.media.filename ? message.media.filename : message.media.sid) +
+                                                         '</a>'));
+          }
         });
       } else {
         $container
           .append($('<span class="message-author">').text(message.author + ':'))
-          .append($('<span class="message">').text(message.body));        
+          .append($('<span class="message">').text(message.body));
       }
       $('#messages').append($container);
       $('#messages').scrollTop($('#messages')[0].scrollHeight);
     };
-    
+
     function clearCurrentViewChannel() {
       if (viewChannel) {
         viewChannel.removeListener('messageAdded', newMessageHandler);
       }
       $('#messages').empty();
       $('#viewChannelInfo').hide();
-      viewChannel = null;      
+      viewChannel = null;
     };
-    
+
     function subscribeToViewChannelInfoChange() {
       ChatClientHelper.client.on('channelAdded', channel => updateViewChannelInfo(channel));
       ChatClientHelper.client.on('channelInvited', channel => updateViewChannelInfo(channel));
@@ -213,14 +228,14 @@
         }
       })
     }
-    
+
     function updateViewChannelInfo(channel) {
       if (viewChannel && viewChannel.sid == channel.sid) {
         $('#viewChannelType').text(channel.type);
         $('#viewChannelStatus').text(channel.status);
       }
     };
-    
+
     $('#viewChannelGetBySid').on('click', function() {
       clearCurrentViewChannel();
       let channelSid = $('#viewChannelSid').val();
@@ -232,22 +247,22 @@
         log.error('index.html', 'You must login first');
         return;
       }
-      
+
       ChatClientHelper.client.getChannelBySid(channelSid)
-      	  .then(channel => {
-            viewChannel = channel;
-            viewChannel.on('messageAdded', newMessageHandler);
-            updateViewChannelInfo(channel);
-            $('#viewChannelInfo').show();
-            viewChannel.getMessages()
-              .then(paginator => paginator.items.forEach( entry => {
-                newMessageHandler(entry);
-              }))
-              .catch(err => log.error('index.html', 'Can\'t get get Channel (SID: ' + channelSid + ') messages:', err));
-          })
-          .catch((err) => {
-            log.error('index.html', 'Error while getting Channel with SID ' + channelSid , err);
-          });
+        .then(channel => {
+          viewChannel = channel;
+          viewChannel.on('messageAdded', newMessageHandler);
+          updateViewChannelInfo(channel);
+          $('#viewChannelInfo').show();
+          viewChannel.getMessages()
+            .then(paginator => paginator.items.forEach(entry => {
+              newMessageHandler(entry);
+            }))
+            .catch(err => log.error('index.html', 'Can\'t get get Channel (SID: ' + channelSid + ') messages:', err));
+        })
+        .catch((err) => {
+          log.error('index.html', 'Error while getting Channel with SID ' + channelSid, err);
+        });
     });
 
     $('#sendMessageInput').on('keydown', function(e) {
@@ -260,7 +275,7 @@
         $('#sendMessageInput').val('');
       }
     });
-    
+
     $('#viewChannelDelete').on('click', function() {
       if (viewChannel) {
         viewChannel.delete()
@@ -269,26 +284,26 @@
           })
       }
     });
-    
+
     $('#viewChannelJoin').on('click', function() {
       if (viewChannel) {
         viewChannel.join()
           .then(() => {
             if ($('#messages').children().length == 0) {
-            viewChannel.getMessages()
-              .then(paginator => paginator.items.forEach( entry => {
-                newMessageHandler(entry);
-              }));
+              viewChannel.getMessages()
+                .then(paginator => paginator.items.forEach(entry => {
+                  newMessageHandler(entry);
+                }));
             }
           })
       }
     });
-    
+
     $('#viewChannelLeave').on('click', function() {
       if (viewChannel) {
         viewChannel.leave();
       }
-    });    
+    });
   });
 </script>
 </body>
