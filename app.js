@@ -87,7 +87,13 @@ http.createServer(app).listen(3000, () => {
   }
 
   ngrok.connect(ngrokOptions).then(url=> {
-      console.log('ngrok url is ' + url);      
+      console.log('ngrok url is ' + url);
+      app.get('/iframe.html', function(req, res) {
+        res.send('<iframe src="'+url+'">\n' +
+                 '</iframe>');
+      });
+      console.log('For iframe open http://localhost:3000/iframe.html');
+
   });
 
 });
