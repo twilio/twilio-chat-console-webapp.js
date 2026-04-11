@@ -19,7 +19,7 @@
     "express": "^4.16.3",
     "http": "0.0.0",
     "ngrok": "^3.0.1",
-    "twilio": "^3.14.0",
+    "twilio": "^4.19.3",
     "twilio-chat": "^3.3.2"
   },
   "engines": {
